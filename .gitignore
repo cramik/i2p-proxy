@@ -1,0 +1,14 @@
+# build artifacts
+/dist/
+/third_party/prebuilt/
+
+# manual test scratch (logs, ad-hoc binaries, generated keys/data)
+/wintest/
+
+# local tooling config
+/.claude/
+
+# editor/OS cruft
+*.swp
+.DS_Store
+Thumbs.db

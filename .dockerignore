@@ -1,0 +1,6 @@
+third_party/i2pd
+third_party/docker
+dist
+i2pdata
+i2pdata2
+.git

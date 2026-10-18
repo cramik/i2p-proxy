@@ -1,0 +1,61 @@
+# i2p-proxy example configuration.
+#
+# mode: server | client | both. one binary, roles selected here.
+mode: both
+
+router:
+  # "loopback" is a dev/test-only backend that never touches the real I2P
+  # network. Dial() only loops back to this router's own destination. It
+  # exists so the rest of the stack can be built and exercised end-to-end
+  # before the real embedded backend lands.
+  #
+  # "i2pd" is the production backend (libi2pd statically linked via cgo,
+  # in-process, no external daemon). See internal/router/i2pd/.
+  backend: loopback
+  data_dir: ./i2pdata
+  tunnels:
+    inbound_length: 3
+    outbound_length: 3
+    inbound_quantity: 2
+    outbound_quantity: 2
+
+server:
+  outproxy:
+    # Off by default. Turning this on makes this node relay clearnet
+    # traffic on behalf of I2P clients, the same exposure profile as
+    # running a Tor exit relay or a VPN exit node. Understand the legal
+    # and abuse implications for your jurisdiction before enabling.
+    enabled: false
+    allow_ports: [80, 443]
+    # RFC1918/loopback/link-local are always denied in addition to this.
+    deny_networks: []
+  # Relay client requests on to other .i2p destinations (pure I2P-to-I2P
+  # relaying, no clearnet exposure).
+  relay_to_i2p: true
+  # Local services this operator explicitly wants reachable via a client's
+  # "expose" entries, e.g. mirror a locally-running web server as this
+  # node's eepsite content.
+  hosted_services:
+    - port: 80
+      local: 127.0.0.1:8080
+  rate_limit:
+    per_source_conns: 20
+    per_source_bandwidth_kbps: 512
+
+client:
+  # The remote server's .b32.i2p (or full base64) destination to tunnel to.
+  upstream_dest: ""
+
+  # Mode A: fixed port-forward to one of the server's hosted_services.
+  expose:
+    - local: 127.0.0.1:8080
+      remote_port: 80
+
+  # Mode B: dynamic exit-proxy / anonymized egress, arbitrary targets.
+  socks5_listen: 127.0.0.1:4444
+  http_listen: 127.0.0.1:4445
+
+logging:
+  level: info
+  # Off by default: don't log source/target I2P destinations or hostnames.
+  log_destinations: false
